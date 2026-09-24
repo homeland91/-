@@ -30,7 +30,7 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            padding-bottom: 80px; /* مساحة لزر التعديل العائم */
+            padding-bottom: 90px;
         }
 
         .container {
@@ -97,6 +97,16 @@
             background: linear-gradient(135deg, var(--gold-hover), var(--gold-primary));
             box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
             transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: #fff;
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(135deg, #34ce57, #28a745);
+            box-shadow: 0 0 12px rgba(40, 167, 69, 0.5);
         }
 
         .btn-back {
@@ -262,6 +272,29 @@
             transform: scale(1.1);
         }
 
+        /* حقوق إنشاء الموقع */
+        footer {
+            margin-top: 35px;
+            text-align: center;
+            padding: 15px 0;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            width: 100%;
+        }
+
+        .footer-text {
+            color: #888;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .footer-author {
+            color: var(--gold-primary);
+            font-weight: 900;
+            font-size: 1.05rem;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+            margin-right: 5px;
+        }
+
         /* النافذة المنبثقة للرمز السرّي */
         .modal-overlay {
             display: none;
@@ -347,14 +380,11 @@
             
             <div class="action-bar admin-only">
                 <button class="btn" onclick="addMacroBox()">+ إضافة مايكرو جديد</button>
+                <button class="btn btn-save" onclick="saveData()">💾 حفظ التعديلات</button>
             </div>
 
             <div id="macro-container">
-                <div class="item-box">
-                    <input type="text" class="item-title editable-field" value="نداء التوقف الأول" readonly style="background:transparent; border:none;">
-                    <textarea rows="3" class="item-content editable-field" id="macro-1" readonly>مركبة هوميلاند: يرجى من سائق المركبة التوقف جانباً وإطفاء المحرك فوراً للتفتيش الروتيني.</textarea>
-                    <button class="btn" style="margin-top: 10px; font-size: 0.85rem;" onclick="copyText('macro-1')">📋 نسخ النص</button>
-                </div>
+                <!-- عناصر المايكرو -->
             </div>
         </div>
 
@@ -366,23 +396,18 @@
             <div class="action-bar admin-only">
                 <button class="btn" onclick="addPolicyBox()">+ إضافة بند جديد</button>
                 <button class="btn" onclick="addAccordionBox()">+ إضافة قائمة مطوية</button>
+                <button class="btn btn-save" onclick="saveData()">💾 حفظ التعديلات</button>
             </div>
 
             <div id="policies-container">
-                <button class="accordion" onclick="toggleAccordion(this)">
-                    <span>نظام الترقية من رتبة جندي إلى عريف</span>
-                    <span>▼</span>
-                </button>
-                <div class="panel">
-                    <div class="panel-content">
-                        <textarea class="item-content editable-field" rows="4" readonly style="background:transparent; border:none;">الشروط المطلوبة:
-1. الخدمة لمدة 3 أيام متواصلة.
-2. حضور الدوريات والالتزام بالمايكرو الرسمية.
-3. عدم وجود أي مخالفات مسجلة.</textarea>
-                    </div>
-                </div>
+                <!-- عناصر السياسات والترقية -->
             </div>
         </div>
+
+        <!-- توقيع إنشاء الموقع -->
+        <footer>
+            <p class="footer-text">تم تطوير وإنشاء الموقع بواسطة: <span class="footer-author">ITS IRAQI</span></p>
+        </footer>
     </div>
 
     <!-- زر التعديل الدائري العائم (القلم شبه الشفاف) -->
@@ -407,14 +432,64 @@
         const SECRET_PIN = "1221";
         let isAdmin = false;
 
-        // التحقق من وجود الرمز في رابط الموقع (اختياري)
+        // تحميل البيانات عند فتح الصفحة
         window.onload = function() {
+            loadData();
+
             const urlParams = new URLSearchParams(window.location.search);
             const pin = urlParams.get('pin');
             if (pin === SECRET_PIN) {
                 activateAdmin();
             }
         };
+
+        // حفظ البيانات في LocalStorage
+        function saveData() {
+            const macroHTML = document.getElementById('macro-container').innerHTML;
+            const policiesHTML = document.getElementById('policies-container').innerHTML;
+
+            localStorage.setItem('homeland_macros', macroHTML);
+            localStorage.setItem('homeland_policies', policiesHTML);
+
+            alert("تم حفظ التعديلات بنجاح!");
+        }
+
+        // استرجاع البيانات المحفوظة
+        function loadData() {
+            const savedMacros = localStorage.getItem('homeland_macros');
+            const savedPolicies = localStorage.getItem('homeland_policies');
+
+            if (savedMacros) {
+                document.getElementById('macro-container').innerHTML = savedMacros;
+            } else {
+                document.getElementById('macro-container').innerHTML = `
+                    <div class="item-box">
+                        <input type="text" class="item-title editable-field" value="نداء التوقف الأول" readonly style="background:transparent; border:none;">
+                        <textarea rows="3" class="item-content editable-field" id="macro-1" readonly>مركبة هوميلاند: يرجى من سائق المركبة التوقف جانباً وإطفاء المحرك فوراً للتفتيش الروتيني.</textarea>
+                        <button class="btn" style="margin-top: 10px; font-size: 0.85rem;" onclick="copyText('macro-1')">📋 نسخ النص</button>
+                    </div>
+                `;
+            }
+
+            if (savedPolicies) {
+                document.getElementById('policies-container').innerHTML = savedPolicies;
+            } else {
+                document.getElementById('policies-container').innerHTML = `
+                    <button class="accordion" onclick="toggleAccordion(this)">
+                        <span>نظام الترقية من رتبة جندي إلى عريف</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="panel">
+                        <div class="panel-content">
+                            <textarea class="item-content editable-field" rows="4" readonly style="background:transparent; border:none;">الشروط المطلوبة:
+1. الخدمة لمدة 3 أيام متواصلة.
+2. حضور الدوريات والالتزام بالمايكرو الرسمية.
+3. عدم وجود أي مخالفات مسجلة.</textarea>
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
         // فتح وإغلاق نافذة الدخول
         function openLoginModal() {
@@ -449,12 +524,10 @@
             isAdmin = true;
             document.getElementById('admin-banner').style.display = 'block';
             
-            // إظهار أزرار الإضافة
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.style.display = 'flex';
             });
 
-            // جعل الخانات قابلة للتعديل
             document.querySelectorAll('.editable-field').forEach(field => {
                 field.removeAttribute('readonly');
                 if(field.tagName === 'INPUT') field.style.border = "1px solid #333";
@@ -482,8 +555,8 @@
             alert("تم نسخ النص بنجاح!");
         }
 
-        // إضافة مايكرو جديد (للمسؤول)
-        let macroCounter = 2;
+        // إضافة مايكرو جديد
+        let macroCounter = Date.now();
         function addMacroBox() {
             const container = document.getElementById('macro-container');
             const newId = `macro-${macroCounter++}`;
@@ -497,7 +570,7 @@
             container.appendChild(box);
         }
 
-        // إضافة خانة سياسة جديدة (للمسؤول)
+        // إضافة سياسة جديدة
         function addPolicyBox() {
             const container = document.getElementById('policies-container');
             const box = document.createElement('div');
@@ -509,7 +582,7 @@
             container.appendChild(box);
         }
 
-        // إضافة قائمة مطوية جديدة (للمسؤول)
+        // إضافة قائمة مطوية
         function addAccordionBox() {
             const container = document.getElementById('policies-container');
             const accBtn = document.createElement('button');
